@@ -40,7 +40,7 @@ import javax.tools.JavaFileObject;
 import org.junit.After;
 import org.junit.Test;
 
-import com.ashigeru.lang.java.jsr269.testing.VolatileCompiler;
+import com.ashigeru.lang.java.jsr199.testing.VolatileCompiler;
 import com.ashigeru.lang.java.model.syntax.*;
 import com.ashigeru.lang.java.model.util.CommentEmitTrait;
 import com.ashigeru.lang.java.model.util.Models;

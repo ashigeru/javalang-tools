@@ -33,8 +33,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.ashigeru.lang.java.jsr269.testing.VolatileCompiler;
-import com.ashigeru.lang.java.jsr269.testing.VolatileJavaFile;
+import com.ashigeru.lang.java.jsr199.testing.VolatileCompiler;
+import com.ashigeru.lang.java.jsr199.testing.VolatileJavaFile;
 import com.ashigeru.lang.java.model.syntax.ModelFactory;
 import com.ashigeru.lang.java.model.syntax.Type;
 import com.ashigeru.lang.java.model.syntax.WildcardBoundKind;

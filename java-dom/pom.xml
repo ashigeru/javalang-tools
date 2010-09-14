@@ -96,7 +96,7 @@ encoding/<project>=UTF-8
     <dependencies>
         <dependency>
             <groupId>com.ashigeru.lang.java</groupId>
-            <artifactId>jsr269-testing</artifactId>
+            <artifactId>jsr199-testing</artifactId>
             <version>0.1.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
