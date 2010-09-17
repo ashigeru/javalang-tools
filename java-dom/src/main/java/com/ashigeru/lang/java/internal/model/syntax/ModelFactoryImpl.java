@@ -2611,7 +2611,7 @@ public class ModelFactoryImpl implements ModelFactory {
             String string) {
         Util.notNull(string, "string"); //$NON-NLS-1$
         SimpleNameImpl result = new SimpleNameImpl();
-        result.setString(string);
+        result.setToken(string);
         return result;
     }
 

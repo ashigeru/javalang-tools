@@ -44,8 +44,19 @@ public final class SimpleNameImpl extends ModelRoot implements SimpleName {
      * @throws IllegalArgumentException
      *     {@code string}に空が指定された場合
      */
-    public void setString(String string) {
+    public void setToken(String string) {
         Util.notNull(string, "string"); //$NON-NLS-1$
+        if (string.isEmpty()) {
+            throw new IllegalArgumentException("string must not be null"); //$NON-NLS-1$
+        }
+        if (Character.isJavaIdentifierStart(string.charAt(0)) == false) {
+            throw new IllegalArgumentException("string must be a valid Java identifier");
+        }
+        for (int i = 1, n = string.length(); i < n; i++) {
+            if (Character.isJavaIdentifierStart(string.charAt(i)) == false) {
+                throw new IllegalArgumentException("string must be a valid Java identifier");
+            }
+        }
         this.string = string;
     }
 
