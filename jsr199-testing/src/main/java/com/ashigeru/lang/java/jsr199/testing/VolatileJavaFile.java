@@ -39,7 +39,7 @@ public class VolatileJavaFile extends SimpleJavaFileObject {
 
     /**
      * 空の内容を持つインスタンスを生成する。
-     * @param path このファイルのソースフォルダからの相対パス (.javaで終わること)
+     * @param path このファイルのソースフォルダからの相対パス (.javaを指定しない)
      * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
      */
     public VolatileJavaFile(String path) {
@@ -85,14 +85,11 @@ public class VolatileJavaFile extends SimpleJavaFileObject {
         if (path == null) {
             throw new IllegalArgumentException("path must not be null"); //$NON-NLS-1$
         }
-        if (path.endsWith(JavaFileObject.Kind.SOURCE.extension) == false) {
-            throw new IllegalArgumentException("path must end with \".java\""); //$NON-NLS-1$
-        }
         try {
             return new URI(
                 URI_SCHEME,
                 null,
-                "/" + path.replace('\\', '/'),
+                "/" + path.replace('\\', '/') + JavaFileObject.Kind.SOURCE.extension,
                 null);
         }
         catch (URISyntaxException e) {

@@ -261,7 +261,7 @@ public class Jsr269Test {
             compiler.addSource(java);
         }
         if (sources.length == 0) {
-            compiler.addSource(new VolatileJavaFile("A.java", "public class A {}"));
+            compiler.addSource(new VolatileJavaFile("A", "public class A {}"));
         }
         compiler.addProcessor(new DelegateProcessor(callback));
         List<Diagnostic<? extends JavaFileObject>> diagnostics = compiler.doCompile();

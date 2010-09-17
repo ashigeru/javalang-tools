@@ -55,7 +55,7 @@ public class MockProcessor extends AbstractProcessor {
         if (elements.isEmpty() == false) {
             try {
                 JavaFileObject file =
-                    processingEnv.getFiler().createSourceFile("Generated.java");
+                    processingEnv.getFiler().createSourceFile("Generated");
                 Writer writer = file.openWriter();
                 PrintWriter pw = new PrintWriter(writer);
                 pw.println("public class Generated {");
