@@ -53,7 +53,7 @@ public final class SimpleNameImpl extends ModelRoot implements SimpleName {
             throw new IllegalArgumentException("string must be a valid Java identifier");
         }
         for (int i = 1, n = string.length(); i < n; i++) {
-            if (Character.isJavaIdentifierStart(string.charAt(i)) == false) {
+            if (Character.isJavaIdentifierPart(string.charAt(i)) == false) {
                 throw new IllegalArgumentException("string must be a valid Java identifier");
             }
         }

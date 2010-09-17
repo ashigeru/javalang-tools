@@ -41,7 +41,38 @@ import org.junit.After;
 import org.junit.Test;
 
 import com.ashigeru.lang.java.jsr199.testing.VolatileCompiler;
-import com.ashigeru.lang.java.model.syntax.*;
+import com.ashigeru.lang.java.model.syntax.Annotation;
+import com.ashigeru.lang.java.model.syntax.AnnotationDeclaration;
+import com.ashigeru.lang.java.model.syntax.AnnotationElement;
+import com.ashigeru.lang.java.model.syntax.Attribute;
+import com.ashigeru.lang.java.model.syntax.BasicTypeKind;
+import com.ashigeru.lang.java.model.syntax.CatchClause;
+import com.ashigeru.lang.java.model.syntax.ClassDeclaration;
+import com.ashigeru.lang.java.model.syntax.Comment;
+import com.ashigeru.lang.java.model.syntax.CompilationUnit;
+import com.ashigeru.lang.java.model.syntax.EnumConstantDeclaration;
+import com.ashigeru.lang.java.model.syntax.Expression;
+import com.ashigeru.lang.java.model.syntax.FormalParameterDeclaration;
+import com.ashigeru.lang.java.model.syntax.ImportDeclaration;
+import com.ashigeru.lang.java.model.syntax.ImportKind;
+import com.ashigeru.lang.java.model.syntax.InfixOperator;
+import com.ashigeru.lang.java.model.syntax.LocalVariableDeclaration;
+import com.ashigeru.lang.java.model.syntax.MethodDeclaration;
+import com.ashigeru.lang.java.model.syntax.ModelFactory;
+import com.ashigeru.lang.java.model.syntax.Modifier;
+import com.ashigeru.lang.java.model.syntax.ModifierKind;
+import com.ashigeru.lang.java.model.syntax.NamedType;
+import com.ashigeru.lang.java.model.syntax.PackageDeclaration;
+import com.ashigeru.lang.java.model.syntax.PostfixOperator;
+import com.ashigeru.lang.java.model.syntax.ReturnStatement;
+import com.ashigeru.lang.java.model.syntax.Statement;
+import com.ashigeru.lang.java.model.syntax.Type;
+import com.ashigeru.lang.java.model.syntax.TypeBodyDeclaration;
+import com.ashigeru.lang.java.model.syntax.TypeDeclaration;
+import com.ashigeru.lang.java.model.syntax.TypeParameterDeclaration;
+import com.ashigeru.lang.java.model.syntax.UnaryOperator;
+import com.ashigeru.lang.java.model.syntax.VariableDeclarator;
+import com.ashigeru.lang.java.model.syntax.WildcardBoundKind;
 import com.ashigeru.lang.java.model.util.CommentEmitTrait;
 import com.ashigeru.lang.java.model.util.Models;
 
@@ -410,7 +441,7 @@ public class ModelEmitterTest {
                     f.newClassInstanceCreationExpression(
                         null,
                         Arrays.asList(new Type[] {}),
-                        f.newNamedType(f.newSimpleName("java.awt.Point")),
+                        f.newNamedType(Models.toName(f, "java.awt.Point")),
                         Arrays.asList(
                             Models.toLiteral(f, 100),
                             Models.toLiteral(f, 200)),
