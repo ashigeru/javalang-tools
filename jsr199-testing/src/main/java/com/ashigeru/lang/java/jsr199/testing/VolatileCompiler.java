@@ -21,6 +21,7 @@ import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -41,6 +42,8 @@ public class VolatileCompiler implements Closeable {
 
     private VolatileClassOutputManager files;
 
+    private List<String> arguments;
+
     private List<JavaFileObject> targets;
 
     private List<Processor> processors;
@@ -59,8 +62,13 @@ public class VolatileCompiler implements Closeable {
                 null,
                 Locale.ENGLISH,
                 Charset.forName("UTF-8")));
+        this.arguments = new ArrayList<String>();
         this.targets = new ArrayList<JavaFileObject>();
         this.processors = new ArrayList<Processor>();
+
+        Collections.addAll(arguments, "-source", "1.6");
+        Collections.addAll(arguments, "-target", "1.6");
+        Collections.addAll(arguments, "-encoding", "UTF-8");
     }
 
     /**
@@ -92,6 +100,46 @@ public class VolatileCompiler implements Closeable {
     }
 
     /**
+     * このコンパイラに登録されたオプション引数の一覧をすべて削除する。
+     * <p>
+     * コンパイラにはあらかじめ下記の引数が指定されているが、それらについても削除する。
+     * </p>
+     * <ul>
+     *   <li> {@code -source 1.6} </li>
+     *   <li> {@code -target 1.6} </li>
+     *   <li> {@code -encoding UTF-8} </li>
+     * </ul>
+     * @return このオブジェクト (メソッドチェイン用)
+     */
+    public VolatileCompiler resetArguments() {
+        arguments.clear();
+        return this;
+    }
+
+    /**
+     * このコンパイラにオプション引数を追加する。
+     * <p>
+     * なお、コンパイラにはあらかじめ下記の引数が指定されている。
+     * </p>
+     * <ul>
+     *   <li> {@code -source 1.6} </li>
+     *   <li> {@code -target 1.6} </li>
+     *   <li> {@code -encoding UTF-8} </li>
+     * </ul>
+     * @param compilerArguments 追加する引数の一覧
+     * @return このオブジェクト (メソッドチェイン用)
+     * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
+     * @see #resetArguments()
+     */
+    public VolatileCompiler addArguments(String...compilerArguments) {
+        if (compilerArguments == null) {
+            throw new IllegalArgumentException("compilerArguments must not be null"); //$NON-NLS-1$
+        }
+        Collections.addAll(arguments, compilerArguments);
+        return this;
+    }
+
+    /**
      * コンパイルを実行し、結果の診断オブジェクトを返す。
      * @return 結果の診断オブジェクト
      * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
@@ -104,11 +152,7 @@ public class VolatileCompiler implements Closeable {
             new PrintWriter(System.err, true),
             files,
             collector,
-            Arrays.asList(new String[] {
-                "-source", "1.6",
-                "-target", "1.6",
-                "-encoding", "UTF-8"
-            }),
+            arguments,
             Arrays.<String>asList(),
             targets);
 
