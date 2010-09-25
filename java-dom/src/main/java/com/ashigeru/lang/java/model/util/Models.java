@@ -16,15 +16,25 @@
 package com.ashigeru.lang.java.model.util;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 import com.ashigeru.lang.java.internal.model.syntax.ModelFactoryImpl;
 import com.ashigeru.lang.java.internal.model.util.LiteralAnalyzer;
 import com.ashigeru.lang.java.internal.model.util.ModelEmitter;
 import com.ashigeru.lang.java.internal.model.util.ReflectionTypeMapper;
+import com.ashigeru.lang.java.model.syntax.ArrayInitializer;
+import com.ashigeru.lang.java.model.syntax.BasicTypeKind;
+import com.ashigeru.lang.java.model.syntax.ClassLiteral;
+import com.ashigeru.lang.java.model.syntax.Expression;
 import com.ashigeru.lang.java.model.syntax.Literal;
 import com.ashigeru.lang.java.model.syntax.Model;
 import com.ashigeru.lang.java.model.syntax.ModelFactory;
+import com.ashigeru.lang.java.model.syntax.ModelKind;
 import com.ashigeru.lang.java.model.syntax.Name;
+import com.ashigeru.lang.java.model.syntax.QualifiedName;
 import com.ashigeru.lang.java.model.syntax.SimpleName;
 import com.ashigeru.lang.java.model.syntax.Type;
 
@@ -40,6 +50,94 @@ public class Models {
      */
     public static ModelFactory getModelFactory() {
         return new ModelFactoryImpl();
+    }
+
+    /**
+     * 指定の名前を単純名のリストに変換して返す。
+     * <p>
+     * 返されるリストは、表記と同様の順序に整列される。
+     * </p>
+     * @param name 変換する名前
+     * @return 変換後の名前
+     * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
+     */
+    public static List<SimpleName> toList(Name name) {
+        if (name == null) {
+            throw new IllegalArgumentException("name must not be null"); //$NON-NLS-1$
+        }
+        ModelKind kind = name.getModelKind();
+        if (kind == ModelKind.SIMPLE_NAME) {
+            return Collections.singletonList((SimpleName) name);
+        }
+        else {
+            LinkedList<SimpleName> result = new LinkedList<SimpleName>();
+            Name current = name;
+            do {
+                QualifiedName qname = (QualifiedName) current;
+                result.addFirst(qname.getSimpleName());
+                current = qname.getQualifier();
+            } while (current.getModelKind() == ModelKind.QUALIFIED_NAME);
+
+            assert current.getModelKind() == ModelKind.SIMPLE_NAME;
+            result.addFirst((SimpleName) current);
+
+            return result;
+        }
+    }
+
+    /**
+     * 指定の名前の末尾に、指定の文字列を名前とみなして末尾に結合して返す。
+     * <p>
+     * 指定された文字列が限定名を表現する場合、限定名とみなして結合する。
+     * </p>
+     * @param factory 利用するファクトリ
+     * @param prefix 結合される名前の先頭の名前
+     * @param rest 末尾に結合される名前を表す文字列
+     * @return 結合された名前
+     * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
+     */
+    public static Name append(ModelFactory factory, Name prefix, String rest) {
+        if (factory == null) {
+            throw new IllegalArgumentException("factory must not be null"); //$NON-NLS-1$
+        }
+        if (prefix == null) {
+            throw new IllegalArgumentException("prefix must not be null"); //$NON-NLS-1$
+        }
+        if (rest == null) {
+            throw new IllegalArgumentException("rest must not be null"); //$NON-NLS-1$
+        }
+        Name name = Models.toName(factory, rest);
+        return append(factory, prefix, name);
+    }
+
+    /**
+     * 指定された名前の一覧を順に結合して返す。
+     * @param factory 利用するファクトリ
+     * @param names 結合される名前のリスト
+     * @return 結合された名前
+     * @throws IllegalArgumentException 名前が指定されない場合、
+     *     または引数に{@code null}が含まれる場合
+     */
+    public static Name append(ModelFactory factory, Name... names) {
+        if (factory == null) {
+            throw new IllegalArgumentException("factory must not be null"); //$NON-NLS-1$
+        }
+        if (names == null) {
+            throw new IllegalArgumentException("names must not be null"); //$NON-NLS-1$
+        }
+        if (names.length == 0) {
+            throw new IllegalArgumentException("names must have elements"); //$NON-NLS-1$
+        }
+        if (names.length == 1) {
+            return names[0];
+        }
+        Name current = names[0];
+        for (int i = 1; i < names.length; i++) {
+            for (SimpleName segment : toList(names[i])) {
+                current = factory.newQualifiedName(current, segment);
+            }
+        }
+        return current;
     }
 
     /**
@@ -132,10 +230,44 @@ public class Models {
     }
 
     /**
+     * 指定の値をキャストしたリテラルに変換する。
+     * @param factory 利用するファクトリ
+     * @param value 値
+     * @return 変換後のリテラル
+     * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
+     */
+    public static Expression toLiteral(ModelFactory factory, byte value) {
+        if (factory == null) {
+            throw new IllegalArgumentException("factory must not be null"); //$NON-NLS-1$
+        }
+        String token = LiteralAnalyzer.intLiteralOf(value);
+        return factory.newCastExpression(
+            factory.newBasicType(BasicTypeKind.BYTE),
+            factory.newLiteral(token));
+    }
+
+    /**
+     * 指定の値をキャストしたリテラルに変換する。
+     * @param factory 利用するファクトリ
+     * @param value 値
+     * @return 変換後のリテラル
+     * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
+     */
+    public static Expression toLiteral(ModelFactory factory, short value) {
+        if (factory == null) {
+            throw new IllegalArgumentException("factory must not be null"); //$NON-NLS-1$
+        }
+        String token = LiteralAnalyzer.intLiteralOf(value);
+        return factory.newCastExpression(
+            factory.newBasicType(BasicTypeKind.SHORT),
+            factory.newLiteral(token));
+    }
+
+    /**
      * 指定の値をリテラルに変換する。
      * @param factory 利用するファクトリ
      * @param value 値
-     * @return 変換後の名前
+     * @return 変換後のリテラル
      * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
      */
     public static Literal toLiteral(ModelFactory factory, int value) {
@@ -150,7 +282,7 @@ public class Models {
      * 指定の値をリテラルに変換する。
      * @param factory 利用するファクトリ
      * @param value 値
-     * @return 変換後の名前
+     * @return 変換後のリテラル
      * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
      */
     public static Literal toLiteral(ModelFactory factory, long value) {
@@ -165,7 +297,7 @@ public class Models {
      * 指定の値をリテラルに変換する。
      * @param factory 利用するファクトリ
      * @param value 値
-     * @return 変換後の名前
+     * @return 変換後のリテラル
      * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
      */
     public static Literal toLiteral(ModelFactory factory, float value) {
@@ -180,7 +312,7 @@ public class Models {
      * 指定の値をリテラルに変換する。
      * @param factory 利用するファクトリ
      * @param value 値
-     * @return 変換後の名前
+     * @return 変換後のリテラル
      * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
      */
     public static Literal toLiteral(ModelFactory factory, double value) {
@@ -195,7 +327,7 @@ public class Models {
      * 指定の値をリテラルに変換する。
      * @param factory 利用するファクトリ
      * @param value 値
-     * @return 変換後の名前
+     * @return 変換後のリテラル
      * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
      */
     public static Literal toLiteral(ModelFactory factory, boolean value) {
@@ -210,7 +342,7 @@ public class Models {
      * 指定の値をリテラルに変換する。
      * @param factory 利用するファクトリ
      * @param value 値
-     * @return 変換後の名前
+     * @return 変換後のリテラル
      * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
      */
     public static Literal toLiteral(ModelFactory factory, char value) {
@@ -225,15 +357,37 @@ public class Models {
      * 指定の値をリテラルに変換する。
      * @param factory 利用するファクトリ
      * @param value 値
-     * @return 変換後の名前
+     * @return 変換後のリテラル
      * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
      */
     public static Literal toLiteral(ModelFactory factory, String value) {
         if (factory == null) {
             throw new IllegalArgumentException("factory must not be null"); //$NON-NLS-1$
         }
+        if (value == null) {
+            throw new IllegalArgumentException("value must not be null"); //$NON-NLS-1$
+        }
         String token = LiteralAnalyzer.stringLiteralOf(value);
         return factory.newLiteral(token);
+    }
+
+    /**
+     * 指定の型をリテラルに変換する。
+     * @param factory 利用するファクトリ
+     * @param type 型
+     * @return 変換後のリテラル
+     * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
+     */
+    public static ClassLiteral toClassLiteral(
+            ModelFactory factory,
+            java.lang.reflect.Type type) {
+        if (factory == null) {
+            throw new IllegalArgumentException("factory must not be null"); //$NON-NLS-1$
+        }
+        if (type == null) {
+            throw new IllegalArgumentException("type must not be null"); //$NON-NLS-1$
+        }
+        return factory.newClassLiteral(Models.toType(factory, type));
     }
 
     /**
@@ -248,6 +402,246 @@ public class Models {
         }
         String token = LiteralAnalyzer.nullLiteral();
         return factory.newLiteral(token);
+    }
+
+    /**
+     * 指定の配列を配列初期化子に変換して返す。
+     * @param factory 利用するファクトリ
+     * @param array 変換する配列
+     * @return 変換後の配列初期化子
+     * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
+     */
+    public static ArrayInitializer toArrayInitializer(
+            ModelFactory factory,
+            int[] array) {
+        if (factory == null) {
+            throw new IllegalArgumentException("factory must not be null"); //$NON-NLS-1$
+        }
+        if (array == null) {
+            throw new IllegalArgumentException("array must not be null"); //$NON-NLS-1$
+        }
+        List<Expression> literals = new ArrayList<Expression>();
+        for (int value : array) {
+            literals.add(Models.toLiteral(factory, value));
+        }
+        return factory.newArrayInitializer(literals);
+    }
+
+    /**
+     * 指定の配列を配列初期化子に変換して返す。
+     * @param factory 利用するファクトリ
+     * @param array 変換する配列
+     * @return 変換後の配列初期化子
+     * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
+     */
+    public static ArrayInitializer toArrayInitializer(
+            ModelFactory factory,
+            float[] array) {
+        if (factory == null) {
+            throw new IllegalArgumentException("factory must not be null"); //$NON-NLS-1$
+        }
+        if (array == null) {
+            throw new IllegalArgumentException("array must not be null"); //$NON-NLS-1$
+        }
+        List<Expression> literals = new ArrayList<Expression>();
+        for (float value : array) {
+            literals.add(Models.toLiteral(factory, value));
+        }
+        return factory.newArrayInitializer(literals);
+    }
+
+    /**
+     * 指定の配列を配列初期化子に変換して返す。
+     * @param factory 利用するファクトリ
+     * @param array 変換する配列
+     * @return 変換後の配列初期化子
+     * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
+     */
+    public static ArrayInitializer toArrayInitializer(
+            ModelFactory factory,
+            long[] array) {
+        if (factory == null) {
+            throw new IllegalArgumentException("factory must not be null"); //$NON-NLS-1$
+        }
+        if (array == null) {
+            throw new IllegalArgumentException("array must not be null"); //$NON-NLS-1$
+        }
+        List<Expression> literals = new ArrayList<Expression>();
+        for (long value : array) {
+            literals.add(Models.toLiteral(factory, value));
+        }
+        return factory.newArrayInitializer(literals);
+    }
+
+    /**
+     * 指定の配列を配列初期化子に変換して返す。
+     * @param factory 利用するファクトリ
+     * @param array 変換する配列
+     * @return 変換後の配列初期化子
+     * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
+     */
+    public static ArrayInitializer toArrayInitializer(
+            ModelFactory factory,
+            double[] array) {
+        if (factory == null) {
+            throw new IllegalArgumentException("factory must not be null"); //$NON-NLS-1$
+        }
+        if (array == null) {
+            throw new IllegalArgumentException("array must not be null"); //$NON-NLS-1$
+        }
+        List<Expression> literals = new ArrayList<Expression>();
+        for (double value : array) {
+            literals.add(Models.toLiteral(factory, value));
+        }
+        return factory.newArrayInitializer(literals);
+    }
+
+    /**
+     * 指定の配列を配列初期化子に変換して返す。
+     * @param factory 利用するファクトリ
+     * @param array 変換する配列
+     * @return 変換後の配列初期化子
+     * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
+     */
+    public static ArrayInitializer toArrayInitializer(
+            ModelFactory factory,
+            char[] array) {
+        if (factory == null) {
+            throw new IllegalArgumentException("factory must not be null"); //$NON-NLS-1$
+        }
+        if (array == null) {
+            throw new IllegalArgumentException("array must not be null"); //$NON-NLS-1$
+        }
+        List<Expression> literals = new ArrayList<Expression>();
+        for (char value : array) {
+            literals.add(Models.toLiteral(factory, value));
+        }
+        return factory.newArrayInitializer(literals);
+    }
+
+    /**
+     * 指定の配列を配列初期化子に変換して返す。
+     * @param factory 利用するファクトリ
+     * @param array 変換する配列
+     * @return 変換後の配列初期化子
+     * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
+     */
+    public static ArrayInitializer toArrayInitializer(
+            ModelFactory factory,
+            boolean[] array) {
+        if (factory == null) {
+            throw new IllegalArgumentException("factory must not be null"); //$NON-NLS-1$
+        }
+        if (array == null) {
+            throw new IllegalArgumentException("array must not be null"); //$NON-NLS-1$
+        }
+        List<Expression> literals = new ArrayList<Expression>();
+        for (boolean value : array) {
+            literals.add(Models.toLiteral(factory, value));
+        }
+        return factory.newArrayInitializer(literals);
+    }
+
+    /**
+     * 指定の配列を配列初期化子に変換して返す。
+     * @param factory 利用するファクトリ
+     * @param array 変換する配列
+     * @return 変換後の配列初期化子
+     * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
+     */
+    public static ArrayInitializer toArrayInitializer(
+            ModelFactory factory,
+            byte[] array) {
+        if (factory == null) {
+            throw new IllegalArgumentException("factory must not be null"); //$NON-NLS-1$
+        }
+        if (array == null) {
+            throw new IllegalArgumentException("array must not be null"); //$NON-NLS-1$
+        }
+        List<Expression> literals = new ArrayList<Expression>();
+        for (byte value : array) {
+            literals.add(Models.toLiteral(factory, value));
+        }
+        return factory.newArrayInitializer(literals);
+    }
+
+    /**
+     * 指定の配列を配列初期化子に変換して返す。
+     * @param factory 利用するファクトリ
+     * @param array 変換する配列
+     * @return 変換後の配列初期化子
+     * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
+     */
+    public static ArrayInitializer toArrayInitializer(
+            ModelFactory factory,
+            short[] array) {
+        if (factory == null) {
+            throw new IllegalArgumentException("factory must not be null"); //$NON-NLS-1$
+        }
+        if (array == null) {
+            throw new IllegalArgumentException("array must not be null"); //$NON-NLS-1$
+        }
+        List<Expression> literals = new ArrayList<Expression>();
+        for (short value : array) {
+            literals.add(Models.toLiteral(factory, value));
+        }
+        return factory.newArrayInitializer(literals);
+    }
+
+    /**
+     * 指定の配列を配列初期化子に変換して返す。
+     * @param factory 利用するファクトリ
+     * @param array 変換する配列
+     * @return 変換後の配列初期化子
+     * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
+     */
+    public static ArrayInitializer toArrayInitializer(
+            ModelFactory factory,
+            String[] array) {
+        if (factory == null) {
+            throw new IllegalArgumentException("factory must not be null"); //$NON-NLS-1$
+        }
+        if (array == null) {
+            throw new IllegalArgumentException("array must not be null"); //$NON-NLS-1$
+        }
+        List<Expression> literals = new ArrayList<Expression>();
+        for (String value : array) {
+            if (value == null) {
+                literals.add(Models.toNullLiteral(factory));
+            }
+            else {
+                literals.add(Models.toLiteral(factory, value));
+            }
+        }
+        return factory.newArrayInitializer(literals);
+    }
+
+    /**
+     * 指定の配列を配列初期化子に変換して返す。
+     * @param factory 利用するファクトリ
+     * @param array 変換する配列
+     * @return 変換後の配列初期化子
+     * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
+     */
+    public static ArrayInitializer toArrayInitializer(
+            ModelFactory factory,
+            java.lang.reflect.Type[] array) {
+        if (factory == null) {
+            throw new IllegalArgumentException("factory must not be null"); //$NON-NLS-1$
+        }
+        if (array == null) {
+            throw new IllegalArgumentException("array must not be null"); //$NON-NLS-1$
+        }
+        List<Expression> literals = new ArrayList<Expression>();
+        for (java.lang.reflect.Type value : array) {
+            if (value == null) {
+                literals.add(Models.toNullLiteral(factory));
+            }
+            else {
+                literals.add(Models.toClassLiteral(factory, value));
+            }
+        }
+        return factory.newArrayInitializer(literals);
     }
 
     private Models() {

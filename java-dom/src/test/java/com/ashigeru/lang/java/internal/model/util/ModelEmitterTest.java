@@ -2156,6 +2156,40 @@ public class ModelEmitterTest {
             "[Hello, world!]");
     }
 
+    /**
+     * 二項演算子の左項での自動括弧付け。
+     */
+    @Test
+    public void autoParenthesize_infixLeft() {
+        assertToString(
+            fromExpr("Hello", f.newInfixExpression(
+                f.newInfixExpression(
+                    Models.toLiteral(f, 10),
+                    InfixOperator.MINUS,
+                    Models.toLiteral(f, 5)),
+                InfixOperator.TIMES,
+                Models.toLiteral(f, 2))),
+            "Hello",
+            "10");
+    }
+
+    /**
+     * 二項演算子の右項での自動括弧付け。
+     */
+    @Test
+    public void autoParenthesize_infixRight() {
+        assertToString(
+            fromExpr("Hello", f.newInfixExpression(
+                Models.toLiteral(f, 100),
+                InfixOperator.MINUS,
+                f.newInfixExpression(
+                    Models.toLiteral(f, 100),
+                    InfixOperator.MINUS,
+                    Models.toLiteral(f, 100)))),
+            "Hello",
+            "100");
+    }
+
     private LocalVariableDeclaration var(Type type, String name, Expression init) {
         return f.newLocalVariableDeclaration(
             Arrays.asList(new Attribute[] {}),

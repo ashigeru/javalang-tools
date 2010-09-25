@@ -17,6 +17,7 @@ package com.ashigeru.lang.java.internal.model.syntax;
 
 import java.util.List;
 
+import com.ashigeru.lang.java.internal.model.util.ExpressionPriority;
 import com.ashigeru.lang.java.model.syntax.*;
 
 /**
@@ -239,7 +240,7 @@ public class ModelFactoryImpl implements ModelFactory {
         Util.notNull(array, "array"); //$NON-NLS-1$
         Util.notNull(index, "index"); //$NON-NLS-1$
         ArrayAccessExpressionImpl result = new ArrayAccessExpressionImpl();
-        result.setArray(array);
+        result.setArray(parenthesize(array, ExpressionPriority.PRIMARY));
         result.setIndex(index);
         return result;
     }
@@ -411,9 +412,9 @@ public class ModelFactoryImpl implements ModelFactory {
         Util.notNull(operator, "operator"); //$NON-NLS-1$
         Util.notNull(rightHandSide, "rightHandSide"); //$NON-NLS-1$
         AssignmentExpressionImpl result = new AssignmentExpressionImpl();
-        result.setLeftHandSide(leftHandSide);
+        result.setLeftHandSide(parenthesize(leftHandSide, ExpressionPriority.ASSIGNMENT));
         result.setOperator(operator);
-        result.setRightHandSide(rightHandSide);
+        result.setRightHandSide(parenthesizeRight(rightHandSide, ExpressionPriority.ASSIGNMENT));
         return result;
     }
 
@@ -553,7 +554,7 @@ public class ModelFactoryImpl implements ModelFactory {
         Util.notNull(expression, "expression"); //$NON-NLS-1$
         CastExpressionImpl result = new CastExpressionImpl();
         result.setType(type);
-        result.setExpression(expression);
+        result.setExpression(parenthesize(expression, ExpressionPriority.CAST));
         return result;
     }
 
@@ -751,7 +752,7 @@ public class ModelFactoryImpl implements ModelFactory {
         Util.notNull(arguments, "arguments"); //$NON-NLS-1$
         Util.notContainNull(arguments, "arguments"); //$NON-NLS-1$
         ClassInstanceCreationExpressionImpl result = new ClassInstanceCreationExpressionImpl();
-        result.setQualifier(qualifier);
+        result.setQualifier(parenthesize(qualifier, ExpressionPriority.PRIMARY));
         result.setTypeArguments(typeArguments);
         result.setType(type);
         result.setArguments(arguments);
@@ -877,9 +878,9 @@ public class ModelFactoryImpl implements ModelFactory {
         Util.notNull(thenExpression, "thenExpression"); //$NON-NLS-1$
         Util.notNull(elseExpression, "elseExpression"); //$NON-NLS-1$
         ConditionalExpressionImpl result = new ConditionalExpressionImpl();
-        result.setCondition(condition);
-        result.setThenExpression(thenExpression);
-        result.setElseExpression(elseExpression);
+        result.setCondition(parenthesize(condition, ExpressionPriority.CONDITIONAL));
+        result.setThenExpression(parenthesize(thenExpression, ExpressionPriority.CONDITIONAL));
+        result.setElseExpression(parenthesize(elseExpression, ExpressionPriority.CONDITIONAL));
         return result;
     }
 
@@ -1454,7 +1455,7 @@ public class ModelFactoryImpl implements ModelFactory {
         Util.notNull(qualifier, "qualifier"); //$NON-NLS-1$
         Util.notNull(name, "name"); //$NON-NLS-1$
         FieldAccessExpressionImpl result = new FieldAccessExpressionImpl();
-        result.setQualifier(qualifier);
+        result.setQualifier(parenthesize(qualifier, ExpressionPriority.PRIMARY));
         result.setName(name);
         return result;
     }
@@ -1736,9 +1737,9 @@ public class ModelFactoryImpl implements ModelFactory {
         Util.notNull(operator, "operator"); //$NON-NLS-1$
         Util.notNull(rightOperand, "rightOperand"); //$NON-NLS-1$
         InfixExpressionImpl result = new InfixExpressionImpl();
-        result.setLeftOperand(leftOperand);
+        result.setLeftOperand(parenthesize(leftOperand, ExpressionPriority.valueOf(operator)));
         result.setOperator(operator);
-        result.setRightOperand(rightOperand);
+        result.setRightOperand(parenthesizeRight(rightOperand, ExpressionPriority.valueOf(operator)));
         return result;
     }
 
@@ -1815,7 +1816,7 @@ public class ModelFactoryImpl implements ModelFactory {
         Util.notNull(expression, "expression"); //$NON-NLS-1$
         Util.notNull(type, "type"); //$NON-NLS-1$
         InstanceofExpressionImpl result = new InstanceofExpressionImpl();
-        result.setExpression(expression);
+        result.setExpression(parenthesize(expression, ExpressionPriority.RELATIONAL));
         result.setType(type);
         return result;
     }
@@ -2488,7 +2489,7 @@ public class ModelFactoryImpl implements ModelFactory {
         Util.notNull(operand, "operand"); //$NON-NLS-1$
         Util.notNull(operator, "operator"); //$NON-NLS-1$
         PostfixExpressionImpl result = new PostfixExpressionImpl();
-        result.setOperand(operand);
+        result.setOperand(parenthesize(operand, ExpressionPriority.UNARY));
         result.setOperator(operator);
         return result;
     }
@@ -2742,7 +2743,7 @@ public class ModelFactoryImpl implements ModelFactory {
         Util.notNull(arguments, "arguments"); //$NON-NLS-1$
         Util.notContainNull(arguments, "arguments"); //$NON-NLS-1$
         SuperConstructorInvocationImpl result = new SuperConstructorInvocationImpl();
-        result.setQualifier(qualifier);
+        result.setQualifier(parenthesize(qualifier, ExpressionPriority.PRIMARY));
         result.setTypeArguments(typeArguments);
         result.setArguments(arguments);
         return result;
@@ -3025,7 +3026,7 @@ public class ModelFactoryImpl implements ModelFactory {
         Util.notNull(operand, "operand"); //$NON-NLS-1$
         UnaryExpressionImpl result = new UnaryExpressionImpl();
         result.setOperator(operator);
-        result.setOperand(operand);
+        result.setOperand(parenthesize(operand, ExpressionPriority.UNARY));
         return result;
     }
 
@@ -3136,5 +3137,31 @@ public class ModelFactoryImpl implements ModelFactory {
         result.setBoundKind(boundKind);
         result.setTypeBound(typeBound);
         return result;
+    }
+
+    private Expression parenthesize(Expression expression, ExpressionPriority context) {
+        if (expression == null) {
+            return null;
+        }
+        ExpressionPriority priority = ExpressionPriority.valueOf(expression);
+        if (ExpressionPriority.isParenthesesRequired(context, false, priority)) {
+            return newParenthesizedExpression0(expression);
+        }
+        else {
+            return expression;
+        }
+    }
+
+    private Expression parenthesizeRight(Expression expression, ExpressionPriority context) {
+        if (expression == null) {
+            return null;
+        }
+        ExpressionPriority priority = ExpressionPriority.valueOf(expression);
+        if (ExpressionPriority.isParenthesesRequired(context, true, priority)) {
+            return newParenthesizedExpression0(expression);
+        }
+        else {
+            return expression;
+        }
     }
 }

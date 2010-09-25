@@ -273,7 +273,6 @@ public enum ModifierKind {
         return getKeyword();
     }
 
-
     private static Set<DeclarationKind> of(DeclarationKind...kinds) {
         return new HashSet<DeclarationKind>(Arrays.asList(kinds));
     }
