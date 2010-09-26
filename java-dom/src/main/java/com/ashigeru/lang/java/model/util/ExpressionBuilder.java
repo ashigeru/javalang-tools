@@ -31,6 +31,10 @@ import com.ashigeru.lang.java.model.syntax.UnaryOperator;
 
 /**
  * 式を構築するビルダー。
+ * <p>
+ * このクラスのオブジェクトは、自身を破壊的に変更してJavadocを構築する。
+ * 特定の状態のビルダーを再利用する場合、{@link #copy()}を利用すること。
+ * </p>
  */
 public class ExpressionBuilder {
 
@@ -53,6 +57,14 @@ public class ExpressionBuilder {
         }
         this.f = factory;
         this.context = context;
+    }
+
+    /**
+     * 現在のビルダーと同等の内容を持つビルダーを新しく作成して返す。
+     * @return コピーしたビルダー
+     */
+    public ExpressionBuilder copy() {
+        return new ExpressionBuilder(f, context);
     }
 
     /**
@@ -93,7 +105,7 @@ public class ExpressionBuilder {
         if (right == null) {
             throw new IllegalArgumentException("right must not be null"); //$NON-NLS-1$
         }
-        return wrap(f.newInfixExpression(context, operator, right));
+        return chain(f.newInfixExpression(context, operator, right));
     }
 
     /**
@@ -106,7 +118,7 @@ public class ExpressionBuilder {
         if (operator == null) {
             throw new IllegalArgumentException("operator must not be null"); //$NON-NLS-1$
         }
-        return wrap(f.newUnaryExpression(operator, context));
+        return chain(f.newUnaryExpression(operator, context));
     }
 
     /**
@@ -119,7 +131,7 @@ public class ExpressionBuilder {
         if (operator == null) {
             throw new IllegalArgumentException("operator must not be null"); //$NON-NLS-1$
         }
-        return wrap(f.newPostfixExpression(context, operator));
+        return chain(f.newPostfixExpression(context, operator));
     }
 
     /**
@@ -151,7 +163,7 @@ public class ExpressionBuilder {
         if (rightHandSide == null) {
             throw new IllegalArgumentException("rightHandSide must not be null"); //$NON-NLS-1$
         }
-        return wrap(f.newAssignmentExpression(
+        return chain(f.newAssignmentExpression(
                 context,
                 InfixOperator.ASSIGN,
                 rightHandSide));
@@ -167,7 +179,7 @@ public class ExpressionBuilder {
         if (type == null) {
             throw new IllegalArgumentException("type must not be null"); //$NON-NLS-1$
         }
-        return wrap(f.newCastExpression(
+        return chain(f.newCastExpression(
                 type,
                 context));
     }
@@ -195,7 +207,7 @@ public class ExpressionBuilder {
         if (type == null) {
             throw new IllegalArgumentException("type must not be null"); //$NON-NLS-1$
         }
-        return wrap(f.newInstanceofExpression(context, type));
+        return chain(f.newInstanceofExpression(context, type));
     }
 
     /**
@@ -234,7 +246,7 @@ public class ExpressionBuilder {
         if (name == null) {
             throw new IllegalArgumentException("name must not be null"); //$NON-NLS-1$
         }
-        return wrap(f.newFieldAccessExpression(context, name));
+        return chain(f.newFieldAccessExpression(context, name));
     }
 
     /**
@@ -269,7 +281,7 @@ public class ExpressionBuilder {
         if (index == null) {
             throw new IllegalArgumentException("index must not be null"); //$NON-NLS-1$
         }
-        return wrap(f.newArrayAccessExpression(context, index));
+        return chain(f.newArrayAccessExpression(context, index));
     }
 
     /**
@@ -462,23 +474,16 @@ public class ExpressionBuilder {
         if (arguments == null) {
             throw new IllegalArgumentException("arguments must not be null"); //$NON-NLS-1$
         }
-        return wrap(f.newMethodInvocationExpression(
+        return chain(f.newMethodInvocationExpression(
                 context,
                 typeArguments,
                 name,
                 arguments));
     }
 
-    /**
-     * 指定の式を操作するビルダーを返す。
-     * @param expression 対象の式
-     * @return 指定の式を操作するビルダー
-     * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
-     */
-    protected ExpressionBuilder wrap(Expression expression) {
-        if (expression == null) {
-            throw new IllegalArgumentException("expression must not be null"); //$NON-NLS-1$
-        }
-        return new ExpressionBuilder(f, expression);
+    private ExpressionBuilder chain(Expression expression) {
+        assert expression != null;
+        context = expression;
+        return this;
     }
 }

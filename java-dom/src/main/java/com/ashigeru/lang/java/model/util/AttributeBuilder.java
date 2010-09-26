@@ -16,7 +16,6 @@
 package com.ashigeru.lang.java.model.util;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import com.ashigeru.lang.java.model.syntax.Annotation;
@@ -32,14 +31,16 @@ import com.ashigeru.lang.java.model.syntax.Type;
 
 /**
  * 修飾子を構築するビルダー。
+ * <p>
+ * このクラスのオブジェクトは、自身を破壊的に変更してJavadocを構築する。
+ * 特定の状態のビルダーを再利用する場合、{@link #copy()}を利用すること。
+ * </p>
  */
 public class AttributeBuilder {
 
     private final ModelFactory f;
 
-    private final AttributeBuilder previous;
-
-    private final Attribute context;
+    private List<Attribute> attributes;
 
     /**
      * インスタンスを生成する。
@@ -51,16 +52,17 @@ public class AttributeBuilder {
             throw new IllegalArgumentException("factory must not be null"); //$NON-NLS-1$
         }
         this.f = factory;
-        this.previous = null;
-        this.context = null;
+        this.attributes = new ArrayList<Attribute>();
     }
 
-    private AttributeBuilder(
-            AttributeBuilder previous,
-            Attribute context) {
-        this.f = previous.f;
-        this.previous = previous;
-        this.context = context;
+    /**
+     * 現在のビルダーと同等の内容を持つビルダーを新しく作成して返す。
+     * @return コピーしたビルダー
+     */
+    public AttributeBuilder copy() {
+        AttributeBuilder copy = new AttributeBuilder(f);
+        copy.attributes = toAttributes();
+        return copy;
     }
 
     /**
@@ -72,14 +74,7 @@ public class AttributeBuilder {
      * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
      */
     public List<Attribute> toAttributes() {
-        LinkedList<Attribute> results = new LinkedList<Attribute>();
-        AttributeBuilder current = this;
-        while (current.previous != null) {
-            assert current.context != null;
-            results.addFirst(current.context);
-        }
-        assert current.context == null;
-        return results;
+        return new ArrayList<Attribute>(attributes);
     }
 
     /**
@@ -227,7 +222,7 @@ public class AttributeBuilder {
         if (modifier == null) {
             throw new IllegalArgumentException("modifier must not be null"); //$NON-NLS-1$
         }
-        return wrap(f.newModifier(modifier));
+        return chain(f.newModifier(modifier));
     }
 
     /**
@@ -556,11 +551,12 @@ public class AttributeBuilder {
         if (annotation == null) {
             throw new IllegalArgumentException("annotation must not be null"); //$NON-NLS-1$
         }
-        return wrap(annotation);
+        return chain(annotation);
     }
 
-    private AttributeBuilder wrap(Attribute attribute) {
+    private AttributeBuilder chain(Attribute attribute) {
         assert attribute != null;
-        return new AttributeBuilder(this, attribute);
+        attributes.add(attribute);
+        return this;
     }
 }
