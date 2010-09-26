@@ -32,7 +32,7 @@ import com.ashigeru.lang.java.model.syntax.UnaryOperator;
 /**
  * 式を構築するビルダー。
  * <p>
- * このクラスのオブジェクトは、自身を破壊的に変更してJavadocを構築する。
+ * このクラスのオブジェクトは、自身を破壊的に変更して式を構築する。
  * 特定の状態のビルダーを再利用する場合、{@link #copy()}を利用すること。
  * </p>
  */
@@ -285,7 +285,7 @@ public class ExpressionBuilder {
     }
 
     /**
-     * このビルダーで構築した式を限定しに取るメソッド起動式を返す。
+     * このビルダーで構築した式を限定子に取るメソッド起動式を返す。
      * @param name 起動するメソッドの名前
      * @param arguments 起動引数の一覧
      * @return 結果をさらに操作するビルダー
@@ -307,7 +307,7 @@ public class ExpressionBuilder {
     }
 
     /**
-     * このビルダーで構築した式を限定しに取るメソッド起動式を返す。
+     * このビルダーで構築した式を限定子に取るメソッド起動式を返す。
      * @param typeArguments 型変数の一覧
      * @param name 起動するメソッドの名前
      * @param arguments 起動引数の一覧
@@ -334,7 +334,7 @@ public class ExpressionBuilder {
     }
 
     /**
-     * このビルダーで構築した式を限定しに取るメソッド起動式を返す。
+     * このビルダーで構築した式を限定子に取るメソッド起動式を返す。
      * @param name 起動するメソッドの名前
      * @param arguments 起動引数の一覧
      * @return 結果をさらに操作するビルダー
@@ -356,7 +356,7 @@ public class ExpressionBuilder {
     }
 
     /**
-     * このビルダーで構築した式を限定しに取るメソッド起動式を返す。
+     * このビルダーで構築した式を限定子に取るメソッド起動式を返す。
      * @param typeArguments 型変数の一覧
      * @param name 起動するメソッドの名前
      * @param arguments 起動引数の一覧
@@ -383,7 +383,7 @@ public class ExpressionBuilder {
     }
 
     /**
-     * このビルダーで構築した式を限定しに取るメソッド起動式を返す。
+     * このビルダーで構築した式を限定子に取るメソッド起動式を返す。
      * @param name 起動するメソッドの名前
      * @param arguments 起動引数の一覧
      * @return 結果をさらに操作するビルダー
@@ -405,7 +405,7 @@ public class ExpressionBuilder {
     }
 
     /**
-     * このビルダーで構築した式を限定しに取るメソッド起動式を返す。
+     * このビルダーで構築した式を限定子に取るメソッド起動式を返す。
      * @param typeArguments 型変数の一覧
      * @param name 起動するメソッドの名前
      * @param arguments 起動引数の一覧
@@ -432,7 +432,7 @@ public class ExpressionBuilder {
     }
 
     /**
-     * このビルダーで構築した式を限定しに取るメソッド起動式を返す。
+     * このビルダーで構築した式を限定子に取るメソッド起動式を返す。
      * @param name 起動するメソッドの名前
      * @param arguments 起動引数の一覧
      * @return 結果をさらに操作するビルダー
@@ -454,7 +454,7 @@ public class ExpressionBuilder {
     }
 
     /**
-     * このビルダーで構築した式を限定しに取るメソッド起動式を返す。
+     * このビルダーで構築した式を限定子に取るメソッド起動式を返す。
      * @param typeArguments 型変数の一覧
      * @param name 起動するメソッドの名前
      * @param arguments 起動引数の一覧

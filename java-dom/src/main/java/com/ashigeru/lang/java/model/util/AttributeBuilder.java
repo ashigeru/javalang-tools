@@ -32,7 +32,7 @@ import com.ashigeru.lang.java.model.syntax.Type;
 /**
  * 修飾子を構築するビルダー。
  * <p>
- * このクラスのオブジェクトは、自身を破壊的に変更してJavadocを構築する。
+ * このクラスのオブジェクトは、自身を破壊的に変更して修飾子等を構築する。
  * 特定の状態のビルダーを再利用する場合、{@link #copy()}を利用すること。
  * </p>
  */
@@ -61,7 +61,7 @@ public class AttributeBuilder {
      */
     public AttributeBuilder copy() {
         AttributeBuilder copy = new AttributeBuilder(f);
-        copy.attributes = toAttributes();
+        copy.attributes.addAll(attributes);
         return copy;
     }
 
