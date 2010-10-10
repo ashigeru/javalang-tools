@@ -48,7 +48,7 @@ public class VolatileJavaFile extends SimpleJavaFileObject {
 
     /**
      * インスタンスを生成する。
-     * @param path このファイルのソースフォルダからの相対パス (.javaで終わること)
+     * @param path このファイルのソースフォルダからの相対パス (.javaを指定しない)
      * @param contents このファイルの内容
      * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
      */
