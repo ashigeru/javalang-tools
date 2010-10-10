@@ -15,12 +15,18 @@
  */
 package com.ashigeru.lang.java.jsr269.bridge;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 
+import javax.annotation.processing.Filer;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.NoType;
@@ -29,16 +35,21 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.WildcardType;
+import javax.tools.JavaFileObject;
 
+import com.ashigeru.lang.java.model.syntax.Annotation;
 import com.ashigeru.lang.java.model.syntax.ArrayType;
 import com.ashigeru.lang.java.model.syntax.BasicType;
 import com.ashigeru.lang.java.model.syntax.BasicTypeKind;
+import com.ashigeru.lang.java.model.syntax.CompilationUnit;
 import com.ashigeru.lang.java.model.syntax.ModelFactory;
 import com.ashigeru.lang.java.model.syntax.ModifierKind;
 import com.ashigeru.lang.java.model.syntax.Name;
 import com.ashigeru.lang.java.model.syntax.NamedType;
+import com.ashigeru.lang.java.model.syntax.PackageDeclaration;
 import com.ashigeru.lang.java.model.syntax.SimpleName;
 import com.ashigeru.lang.java.model.syntax.Type;
+import com.ashigeru.lang.java.model.syntax.TypeDeclaration;
 import com.ashigeru.lang.java.model.syntax.Wildcard;
 import com.ashigeru.lang.java.model.syntax.WildcardBoundKind;
 import com.ashigeru.lang.java.model.util.Models;
@@ -77,6 +88,27 @@ public class Jsr269 {
             throw new IllegalArgumentException("factory must not be null"); //$NON-NLS-1$
         }
         this.factory = factory;
+    }
+
+    /**
+     * パッケージ宣言を変換する。
+     * @param packageElement 変換するパッケージ宣言
+     * @return 変換後のパッケージ宣言、ドキュメンテーションや注釈は省略され、
+     *     無名パッケージの場合は{@code null}
+     * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
+     */
+    public PackageDeclaration convert(PackageElement packageElement) {
+        if (packageElement == null) {
+            throw new IllegalArgumentException(
+                "packageElement must not be null"); //$NON-NLS-1$
+        }
+        if (packageElement.isUnnamed()) {
+            return null;
+        }
+        return factory.newPackageDeclaration(
+                null,
+                Collections.<Annotation>emptyList(),
+                convert(packageElement.getQualifiedName()));
     }
 
     /**
@@ -354,5 +386,44 @@ public class Jsr269 {
             }
         }
         return results;
+    }
+
+    /**
+     * 指定のファイラーを利用して、コンパイル単位の内容を出力する。
+     * @param filer 利用するファイラー
+     * @param unit 出力するコンパイル単位
+     * @throws IOException 出力時にエラーが発生した場合
+     * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
+     */
+    public void emit(Filer filer, CompilationUnit unit) throws IOException {
+        if (filer == null) {
+            throw new IllegalArgumentException("filer must not be null"); //$NON-NLS-1$
+        }
+        if (unit == null) {
+            throw new IllegalArgumentException("unit must not be null"); //$NON-NLS-1$
+        }
+        StringBuilder name = new StringBuilder();
+        if (unit.getPackageDeclaration() != null) {
+            name.append(unit.getPackageDeclaration().getName());
+            name.append('.');
+        }
+        TypeDeclaration primary =
+            com.ashigeru.lang.java.model.util.Filer.findPrimaryType(unit);
+        if (primary == null) {
+            name.append("package-info");
+        }
+        else {
+            name.append(primary.getName());
+        }
+        JavaFileObject source = filer.createSourceFile(name);
+        Writer writer = source.openWriter();
+        try {
+            PrintWriter output = new PrintWriter(writer);
+            Models.emit(primary, output);
+            output.close();
+        }
+        finally {
+            writer.close();
+        }
     }
 }
