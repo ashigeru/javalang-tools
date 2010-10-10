@@ -72,6 +72,30 @@ public class ImportBuilder {
     }
 
     /**
+     * 指定の名前をパッケージメンバーの型名としてインポートし、インポート後の型表現を返す。
+     * @param name 対象の型名
+     * @return インポート後の型
+     * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
+     */
+    public Type resolvePackageMember(Name name) {
+        if (name == null) {
+            throw new IllegalArgumentException("name must not be null"); //$NON-NLS-1$
+        }
+        NamedType type;
+        if (packageDecl == null) {
+            type = resolver.factory.newNamedType(name);
+        }
+        else {
+            Name qualified = Models.append(
+                    resolver.factory,
+                    packageDecl.getName(),
+                    name);
+            type = resolver.factory.newNamedType(qualified);
+        }
+        return resolve(type);
+    }
+
+    /**
      * 指定の型を可能であればインポートし、インポート後の型表現を返す。
      * @param type 対象の型
      * @return インポート後の型
@@ -115,6 +139,14 @@ public class ImportBuilder {
         }
         Collections.sort(results, ImportComparator.INSTANCE);
         return results;
+    }
+
+    /**
+     * このビルダーが対象としているパッケージの宣言を返す。
+     * @return このビルダーが対象としているパッケージの宣言
+     */
+    public PackageDeclaration getPackageDeclaration() {
+        return this.packageDecl;
     }
 
     private Set<Name> createImplicit() {

@@ -96,8 +96,19 @@ public class Filer {
         return openFor(unit.getPackageDeclaration(), primary);
     }
 
-    private static TypeDeclaration findPrimaryType(CompilationUnit unit) {
-        assert unit != null;
+    /**
+     * 指定のコンパイル単位に含まれる、ファイル名に利用できそうな型の宣言を返す。
+     * <p>
+     * 型の宣言が指定のコンパイル単位に含まれない場合、このメソッドは{@code null}を返す。
+     * </p>
+     * @param unit 対象のコンパイル単位
+     * @return ファイル名に利用できそうな型の宣言、存在しない場合は{@code null}
+     * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
+     */
+    public static TypeDeclaration findPrimaryType(CompilationUnit unit) {
+        if (unit == null) {
+            throw new IllegalArgumentException("unit must not be null"); //$NON-NLS-1$
+        }
         TypeDeclaration first = null;
         for (TypeDeclaration decl : unit.getTypeDeclarations()) {
             if (first == null) {
