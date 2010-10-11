@@ -17,6 +17,7 @@ package com.ashigeru.lang.java.internal.model.syntax;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.ashigeru.lang.java.model.syntax.ModelKind;
@@ -122,6 +123,16 @@ public final class SimpleNameImpl extends ModelRoot implements SimpleName {
             throw new IllegalArgumentException("string must be a valid Java identifier");
         }
         this.string = string;
+    }
+
+    @Override
+    public SimpleName getLastSegment() {
+        return this;
+    }
+
+    @Override
+    public List<SimpleName> toNameList() {
+        return Collections.<SimpleName>singletonList(this);
     }
 
     /**

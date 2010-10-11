@@ -15,6 +15,8 @@
  */
 package com.ashigeru.lang.java.model.syntax;
 
+import java.util.List;
+
 
 /**
  * 名前を表現する基底インターフェース。
@@ -31,5 +33,21 @@ package com.ashigeru.lang.java.model.syntax;
 public interface Name
         extends Expression, DocElement {
 
-    // properties
+    /**
+     * この名前の末尾の単純名を返す。
+     * <p>
+     * この名前が単純名である場合は、名前そのものが返される。
+     * </p>
+     * @return この名前の末尾の単純名
+     */
+    SimpleName getLastSegment();
+
+    /**
+     * この名前を単純名のリストに変換して返す。
+     * <p>
+     * 返されるリストは、表記と同様の順序に整列される。
+     * </p>
+     * @return 変換後の名前
+     */
+    List<SimpleName> toNameList();
 }

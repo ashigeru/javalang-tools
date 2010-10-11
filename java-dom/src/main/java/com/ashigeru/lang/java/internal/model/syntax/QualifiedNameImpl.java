@@ -15,6 +15,9 @@
  */
 package com.ashigeru.lang.java.internal.model.syntax;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import com.ashigeru.lang.java.model.syntax.ModelKind;
 import com.ashigeru.lang.java.model.syntax.Name;
 import com.ashigeru.lang.java.model.syntax.QualifiedName;
@@ -78,6 +81,25 @@ public final class QualifiedNameImpl extends ModelRoot implements QualifiedName 
     @Override
     public ModelKind getModelKind() {
         return ModelKind.QUALIFIED_NAME;
+    }
+    @Override
+    public SimpleName getLastSegment() {
+        return getSimpleName();
+    }
+
+    @Override
+    public List<SimpleName> toNameList() {
+        LinkedList<SimpleName> result = new LinkedList<SimpleName>();
+        result.addFirst(getSimpleName());
+        Name current = getQualifier();
+        while (current.getModelKind() == ModelKind.QUALIFIED_NAME) {
+            QualifiedName qname = (QualifiedName) current;
+            result.addFirst(qname.getSimpleName());
+            current = qname.getQualifier();
+        }
+        assert current.getModelKind() == ModelKind.SIMPLE_NAME;
+        result.addFirst((SimpleName) current);
+        return result;
     }
 
     @Override
