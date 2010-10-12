@@ -62,22 +62,27 @@ public class SafeProcessor implements Processor {
         }
     }
 
+    @Override
     public void init(ProcessingEnvironment processingEnv) {
         this.delegate.init(processingEnv);
     }
 
+    @Override
     public Set<String> getSupportedOptions() {
         return this.delegate.getSupportedOptions();
     }
 
+    @Override
     public Set<String> getSupportedAnnotationTypes() {
         return this.delegate.getSupportedAnnotationTypes();
     }
 
+    @Override
     public SourceVersion getSupportedSourceVersion() {
         return this.delegate.getSupportedSourceVersion();
     }
 
+    @Override
     public boolean process(
             Set<? extends TypeElement> annotations,
             RoundEnvironment roundEnv) {
@@ -94,6 +99,7 @@ public class SafeProcessor implements Processor {
         }
     }
 
+    @Override
     public Iterable<? extends Completion> getCompletions(
             Element element,
             AnnotationMirror annotation,

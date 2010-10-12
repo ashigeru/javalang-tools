@@ -230,7 +230,7 @@ public class VolatileClassOutputManager
             if (sourceMap.containsKey(binaryName)) {
                 return sourceMap.get(binaryName);
             }
-            VolatileJavaFile javaFile = new VolatileJavaFile(binaryName);
+            VolatileJavaFile javaFile = new VolatileJavaFile(className.replace('.', '/'));
             sourceMap.put(binaryName, javaFile);
             return javaFile;
         }
@@ -260,6 +260,19 @@ public class VolatileClassOutputManager
         else {
             return super.list(location, packageName, kinds, recurse);
         }
+    }
+
+    @Override
+    public boolean isSameFile(FileObject a, FileObject b) {
+        if (a instanceof VolatileJavaFile ||
+                a instanceof VolatileClassFile) {
+            return a.toUri().equals(b.toUri());
+        }
+        if (b instanceof VolatileJavaFile ||
+                b instanceof VolatileClassFile) {
+            return b.toUri().equals(a.toUri());
+        }
+        return super.isSameFile(a, b);
     }
 
     private Collection<JavaFileObject> inPackage(
