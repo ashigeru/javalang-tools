@@ -419,7 +419,7 @@ public class Jsr269 {
         Writer writer = source.openWriter();
         try {
             PrintWriter output = new PrintWriter(writer);
-            Models.emit(primary, output);
+            Models.emit(unit, output);
             output.close();
         }
         finally {
