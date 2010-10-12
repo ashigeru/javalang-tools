@@ -125,6 +125,20 @@ public class JavadocBuilder {
     }
 
     /**
+     * 指定のインライン要素を挿入する。
+     * @param elems 対象の要素
+     * @return 続きの操作を行うビルダー
+     * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
+     */
+    public JavadocBuilder inline(List<? extends DocElement> elems) {
+        if (elems == null) {
+            throw new IllegalArgumentException("elems must not be null"); //$NON-NLS-1$
+        }
+        elements.addAll(elems);
+        return this;
+    }
+
+    /**
      * 指定の名前のパラメーターに関する<code>&#64;param</code>タグブロックを開始する。
      * <p>
      * 直前までのブロックはこの操作によって終了する。
