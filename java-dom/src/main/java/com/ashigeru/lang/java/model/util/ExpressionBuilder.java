@@ -26,6 +26,7 @@ import com.ashigeru.lang.java.model.syntax.ModelFactory;
 import com.ashigeru.lang.java.model.syntax.PostfixOperator;
 import com.ashigeru.lang.java.model.syntax.ReturnStatement;
 import com.ashigeru.lang.java.model.syntax.SimpleName;
+import com.ashigeru.lang.java.model.syntax.ThrowStatement;
 import com.ashigeru.lang.java.model.syntax.Type;
 import com.ashigeru.lang.java.model.syntax.UnaryOperator;
 
@@ -81,6 +82,14 @@ public class ExpressionBuilder {
      */
     public ExpressionStatement toStatement() {
         return f.newExpressionStatement(toExpression());
+    }
+
+    /**
+     * このビルダーで構築した式を{@code throw}文に変換して返す。
+     * @return このビルダーで構築した式をスローする{@code throw}文
+     */
+    public ThrowStatement toThrowStatement() {
+        return f.newThrowStatement(toExpression());
     }
 
     /**
