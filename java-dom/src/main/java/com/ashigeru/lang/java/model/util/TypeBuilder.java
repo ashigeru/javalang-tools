@@ -319,6 +319,32 @@ public class TypeBuilder {
     }
 
     /**
+     * このビルダーで構築した型名を限定子に取るフィールド参照式を返す。
+     * @param name 参照するフィールドの名前
+     * @return 結果をさらに操作するビルダー
+     * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
+     */
+    public ExpressionBuilder field(String name) {
+        if (name == null) {
+            throw new IllegalArgumentException("name must not be null"); //$NON-NLS-1$
+        }
+        return field(f.newSimpleName(name));
+    }
+
+    /**
+     * このビルダーで構築した型名を限定子に取るフィールド参照式を返す。
+     * @param name 参照するフィールドの名前
+     * @return 結果をさらに操作するビルダー
+     * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
+     */
+    public ExpressionBuilder field(SimpleName name) {
+        if (name == null) {
+            throw new IllegalArgumentException("name must not be null"); //$NON-NLS-1$
+        }
+        return expr(f.newQualifiedName(toNamedType().getName(), name));
+    }
+
+    /**
      * このビルダーで構築した型名を限定子に取るメソッド起動式を返す。
      * @param name 起動するメソッドの名前
      * @param arguments 起動引数の一覧
