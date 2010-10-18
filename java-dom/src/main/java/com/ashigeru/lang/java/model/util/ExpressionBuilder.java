@@ -19,9 +19,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.ashigeru.lang.java.model.syntax.Attribute;
 import com.ashigeru.lang.java.model.syntax.Expression;
 import com.ashigeru.lang.java.model.syntax.ExpressionStatement;
 import com.ashigeru.lang.java.model.syntax.InfixOperator;
+import com.ashigeru.lang.java.model.syntax.LocalVariableDeclaration;
 import com.ashigeru.lang.java.model.syntax.ModelFactory;
 import com.ashigeru.lang.java.model.syntax.PostfixOperator;
 import com.ashigeru.lang.java.model.syntax.ReturnStatement;
@@ -98,6 +100,50 @@ public class ExpressionBuilder {
      */
     public ReturnStatement toReturnStatement() {
         return f.newReturnStatement(toExpression());
+    }
+
+    /**
+     * このビルダーで構築した式を初期化式に持つローカル変数宣言を生成して返す。
+     * @param type ローカル変数宣言の式
+     * @param name 生成するローカル変数の名前
+     * @return 生成したローカル変数宣言
+     * @throws IllegalArgumentException 引数に{@code null}が指定された場合
+     */
+    public LocalVariableDeclaration toLocalVariableDeclaration(
+            Type type,
+            String name) {
+        if (type == null) {
+            throw new IllegalArgumentException("type must not be null"); //$NON-NLS-1$
+        }
+        if (name == null) {
+            throw new IllegalArgumentException("name must not be null"); //$NON-NLS-1$
+        }
+        return toLocalVariableDeclaration(type, f.newSimpleName(name));
+    }
+
+    /**
+     * このビルダーで構築した式を初期化式に持つローカル変数宣言を生成して返す。
+     * @param type ローカル変数宣言の式
+     * @param name 生成するローカル変数の名前
+     * @return 生成したローカル変数宣言
+     * @throws IllegalArgumentException 引数に{@code null}が指定された場合
+     */
+    public LocalVariableDeclaration toLocalVariableDeclaration(
+            Type type,
+            SimpleName name) {
+        if (type == null) {
+            throw new IllegalArgumentException("type must not be null"); //$NON-NLS-1$
+        }
+        if (name == null) {
+            throw new IllegalArgumentException("name must not be null"); //$NON-NLS-1$
+        }
+        return f.newLocalVariableDeclaration(
+                Collections.<Attribute>emptyList(),
+                type,
+                Collections.singletonList(f.newVariableDeclarator(
+                        name,
+                        0,
+                        context)));
     }
 
     /**
