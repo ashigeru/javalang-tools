@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -81,18 +82,53 @@ public class ImportBuilder {
         if (name == null) {
             throw new IllegalArgumentException("name must not be null"); //$NON-NLS-1$
         }
-        NamedType type;
+        Type type;
+        if (name.getModelKind() == ModelKind.SIMPLE_NAME) {
+            type = reservePackageMember((SimpleName) name);
+        }
+        else {
+            type = reservePackageMember((QualifiedName) name);
+        }
+        return resolve(type);
+    }
+
+    private Type reservePackageMember(SimpleName name) {
+        assert name != null;
         if (packageDecl == null) {
-            type = resolver.factory.newNamedType(name);
+            return resolver.factory.newNamedType(name);
         }
         else {
             Name qualified = Models.append(
                     resolver.factory,
                     packageDecl.getName(),
                     name);
-            type = resolver.factory.newNamedType(qualified);
+            return resolver.factory.newNamedType(qualified);
         }
-        return resolve(type);
+    }
+
+    private Type reservePackageMember(QualifiedName name) {
+        assert name != null;
+        List<SimpleName> list = name.toNameList();
+        Name current;
+        Iterator<SimpleName> iter = list.iterator();
+        assert iter.hasNext();
+        SimpleName first = iter.next();
+        if (packageDecl == null) {
+            current = first;
+        }
+        else {
+            current = resolver.factory.newQualifiedName(
+                    packageDecl.getName(),
+                    first);
+        }
+        resolver.reserved.put(first, current);
+
+        while (iter.hasNext()) {
+            SimpleName next = iter.next();
+            current = resolver.factory.newQualifiedName(current, next);
+            resolver.reserved.put(next, current);
+        }
+        return resolver.factory.newNamedType(current);
     }
 
     /**
@@ -177,19 +213,19 @@ public class ImportBuilder {
 
     private static class Resolver extends StrictVisitor<Type, Void, NoThrow> {
 
-        private Strategy strategy;
+        final Strategy strategy;
 
-        Map<QualifiedName, SimpleName> imported;
+        final Map<QualifiedName, SimpleName> imported;
 
-        private Set<SimpleName> used;
+        final Map<SimpleName, Name> reserved;
 
-        ModelFactory factory;
+        final ModelFactory factory;
 
         Resolver(ModelFactory factory, Strategy strategy) {
             this.factory = factory;
             this.strategy = strategy;
             this.imported = new HashMap<QualifiedName, SimpleName>();
-            this.used = new HashSet<SimpleName>();
+            this.reserved = new HashMap<SimpleName, Name>();
         }
 
         @Override
@@ -211,25 +247,26 @@ public class ImportBuilder {
             Name name = elem.getName();
 
             if (name.getModelKind() == ModelKind.SIMPLE_NAME) {
-                used.add((SimpleName) name);
+                reserved.put((SimpleName) name, elem.getName());
                 return elem;
             }
 
             LinkedList<SimpleName> segments = new LinkedList<SimpleName>();
             name = normalize(name, segments);
             if (name.getModelKind() == ModelKind.SIMPLE_NAME) {
-                used.add((SimpleName) name);
+                reserved.put((SimpleName) name, elem.getName());
                 return elem;
             }
 
             QualifiedName qname = (QualifiedName) name;
             SimpleName renamed = imported.get(qname);
             if (renamed == null) {
-                if (used.contains(qname.getSimpleName())) {
+                if (reserved.containsKey(qname.getSimpleName()) &&
+                        reserved.get(qname.getSimpleName()).equals(qname) == false) {
                     return elem;
                 }
                 imported.put(qname, qname.getSimpleName());
-                used.add(qname.getSimpleName());
+                reserved.put(qname.getSimpleName(), qname);
             }
             return factory.newNamedType(Models.append(
                 factory,
