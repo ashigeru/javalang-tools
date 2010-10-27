@@ -16,10 +16,13 @@
 package com.ashigeru.lang.java.model.util;
 
 import java.io.PrintWriter;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import com.ashigeru.lang.java.internal.model.syntax.ModelFactoryImpl;
 import com.ashigeru.lang.java.internal.model.util.LiteralAnalyzer;
@@ -43,6 +46,20 @@ import com.ashigeru.lang.java.model.syntax.Type;
  * @author ashigeru
  */
 public class Models {
+
+    private static final Map<Class<?>, BasicTypeKind> WRAPPER_TYPE_KINDS;
+    static {
+        Map<Class<?>, BasicTypeKind> map = new HashMap<Class<?>, BasicTypeKind>();
+        map.put(Byte.class, BasicTypeKind.BYTE);
+        map.put(Short.class, BasicTypeKind.SHORT);
+        map.put(Integer.class, BasicTypeKind.INT);
+        map.put(Long.class, BasicTypeKind.LONG);
+        map.put(Float.class, BasicTypeKind.FLOAT);
+        map.put(Double.class, BasicTypeKind.DOUBLE);
+        map.put(Character.class, BasicTypeKind.CHAR);
+        map.put(Boolean.class, BasicTypeKind.BOOLEAN);
+        WRAPPER_TYPE_KINDS = map;
+    }
 
     /**
      * {@link Model}の実装を生成するためのファクトリを返す。
@@ -369,6 +386,58 @@ public class Models {
         }
         String token = LiteralAnalyzer.stringLiteralOf(value);
         return factory.newLiteral(token);
+    }
+
+    /**
+     * 指定の値がプリミティブのラッパー型、{@code null}、
+     * {@code String}、{@code java.lang.reflect.Type}のいずれかである場合に、
+     * そのリテラル表現を返す。
+     * @param factory 利用するファクトリ
+     * @param value 変換する値
+     * @return 変換後の表現
+     * @throws IllegalArgumentException 変換できなかった場合、または引数に{@code null}が指定された場合
+     */
+    public static Expression toLiteral(ModelFactory factory, Object value) {
+        if (factory == null) {
+            throw new IllegalArgumentException("factory must not be null"); //$NON-NLS-1$
+        }
+        if (value == null) {
+            return toNullLiteral(factory);
+        }
+        Class<? extends Object> valueClass = value.getClass();
+        BasicTypeKind kind = WRAPPER_TYPE_KINDS.get(valueClass);
+        if (kind != null) {
+            switch (kind) {
+            case BYTE:
+                return toLiteral(factory, (byte) (Byte) value);
+            case SHORT:
+                return toLiteral(factory, (short) (Short) value);
+            case INT:
+                return toLiteral(factory, (int) (Integer) value);
+            case LONG:
+                return toLiteral(factory, (long) (Long) value);
+            case FLOAT:
+                return toLiteral(factory, (float) (Float) value);
+            case DOUBLE:
+                return toLiteral(factory, (double) (Double) value);
+            case CHAR:
+                return toLiteral(factory, (char) (Character) value);
+            case BOOLEAN:
+                return toLiteral(factory, (boolean) (Boolean) value);
+            default:
+                throw new AssertionError(kind);
+            }
+        }
+        else if (valueClass == String.class) {
+            return toLiteral(factory, (String) value);
+        }
+        else if (value instanceof Type) {
+            return toClassLiteral(factory, (java.lang.reflect.Type) value);
+        }
+        throw new IllegalArgumentException(MessageFormat.format(
+                "Cannot convert {0} to literal ({1})",
+                value,
+                valueClass));
     }
 
     /**
