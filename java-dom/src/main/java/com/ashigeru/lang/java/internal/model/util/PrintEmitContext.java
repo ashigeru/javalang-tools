@@ -137,6 +137,11 @@ public class PrintEmitContext implements EmitContext {
     }
 
     @Override
+    public void padding() {
+        before(State.PADDING);
+    }
+
+    @Override
     public void comment(int location, String content) {
         if (content == null) {
             throw new IllegalArgumentException("content must not be null"); //$NON-NLS-1$
@@ -322,39 +327,50 @@ public class PrintEmitContext implements EmitContext {
             if (next == State.LINE_END) {
                 state = State.INIT;
             }
-        }
             break;
+        }
         case IMMEDIATE:
         case KEYWORD: {
-            if (next != State.SYMBOL && next != State.SEPARATOR
+            if (next != State.PADDING
+                    && next != State.SYMBOL
+                    && next != State.SEPARATOR
                     && next != State.LINE_END) {
                 putPadding();
             }
-        }
             break;
+        }
         case OPERATOR: {
-            if (next != State.SEPARATOR && next != State.LINE_END) {
+            if (next != State.PADDING
+                    && next != State.SEPARATOR
+                    && next != State.LINE_END) {
                 putPadding();
             }
-        }
             break;
+        }
         case SEPARATOR: {
-            if (next != State.SYMBOL && next != State.OPERATOR
-                    && next != State.SEPARATOR && next != State.LINE_END) {
+            if (next != State.PADDING
+                    && next != State.SYMBOL
+                    && next != State.OPERATOR
+                    && next != State.SEPARATOR
+                    && next != State.LINE_END) {
                 putPadding();
             }
-        }
             break;
+        }
         case SYMBOL: {
             // do nothing
-        }
             break;
+        }
+        case PADDING: {
+            putPadding();
+            break;
+        }
         case BLOCK_START: {
             if (next != State.LINE_END) {
                 putLineBreak();
             }
-        }
             break;
+        }
         case BLOCK_END: {
             if (next == State.SEPARATOR) {
                 state = State.LINE_END;
@@ -365,26 +381,26 @@ public class PrintEmitContext implements EmitContext {
             else if (next != State.LINE_END) {
                 putLineBreak();
             }
-        }
             break;
+        }
         case BLOCK_COMMENT: {
             if (next != State.LINE_END) {
                 putLineBreak();
             }
-        }
             break;
+        }
         case INLINE_COMMENT: {
             if (next != State.LINE_END) {
                 putPadding();
             }
-        }
             break;
+        }
         case LINE_END: {
             if (next != State.LINE_END) {
                 putLineBreak();
             }
-        }
             break;
+        }
         default:
             throw new AssertionError(prev);
         }
@@ -475,6 +491,11 @@ public class PrintEmitContext implements EmitContext {
          * 区切り子を出力。
          */
         SEPARATOR,
+
+        /**
+         * パディングを出力。
+         */
+        PADDING,
 
         /**
          * 任意のブロック開始文字を出力。

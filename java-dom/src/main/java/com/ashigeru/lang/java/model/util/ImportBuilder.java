@@ -145,6 +145,19 @@ public class ImportBuilder {
     }
 
     /**
+     * 指定の名前からなる型を可能であればインポートし、インポート後の型表現を返す。
+     * @param name 対象の型名
+     * @return インポート後の型
+     * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
+     */
+    public Type toType(Name name) {
+        if (name == null) {
+            throw new IllegalArgumentException("name must not be null"); //$NON-NLS-1$
+        }
+        return resolve(resolver.factory.newNamedType(name));
+    }
+
+    /**
      * 指定の型を可能であればインポートし、インポート後の型表現を返す。
      * @param type 対象の型
      * @return インポート後の型

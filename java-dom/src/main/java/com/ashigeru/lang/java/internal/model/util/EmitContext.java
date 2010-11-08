@@ -70,6 +70,11 @@ public interface EmitContext {
     void separator(String symbol);
 
     /**
+     * 強制的にパディングを挿入する。
+     */
+    void padding();
+
+    /**
      * コメントを登録する。
      * <p>
      * 登録されたコメントは{@link #flushComments(int)}等を呼び出した際に
