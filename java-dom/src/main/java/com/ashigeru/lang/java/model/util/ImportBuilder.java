@@ -41,6 +41,8 @@ import com.ashigeru.lang.java.model.syntax.QualifiedType;
 import com.ashigeru.lang.java.model.syntax.SimpleName;
 import com.ashigeru.lang.java.model.syntax.StrictVisitor;
 import com.ashigeru.lang.java.model.syntax.Type;
+import com.ashigeru.lang.java.model.syntax.Wildcard;
+import com.ashigeru.lang.java.model.syntax.WildcardBoundKind;
 
 /**
  * {@link ImportDeclaration}を構築するビルダー。
@@ -349,6 +351,18 @@ public class ImportBuilder {
                 return elem;
             }
             return factory.newQualifiedType(qualifier, elem.getSimpleName());
+        }
+
+        @Override
+        public Type visitWildcard(Wildcard elem, Void _) throws NoThrow {
+            if (elem.getBoundKind() == WildcardBoundKind.UNBOUNDED) {
+                return elem;
+            }
+            Type bound = elem.getTypeBound().accept(this, _);
+            if (bound.equals(elem.getTypeBound())) {
+                return elem;
+            }
+            return factory.newWildcard(elem.getBoundKind(), bound);
         }
     }
 
