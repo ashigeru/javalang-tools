@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
 
+import com.ashigeru.lang.java.model.syntax.Name;
 import com.ashigeru.lang.java.model.syntax.PackageDeclaration;
 import com.ashigeru.lang.java.model.syntax.SimpleName;
 
@@ -62,8 +63,24 @@ public class Filer extends Emitter {
         if (packageDeclOrNull == null) {
             return outputPath;
         }
+        return getFolderFor(packageDeclOrNull.getName());
+    }
+
+    /**
+     * 指定のパッケージ名に関連するフォルダへのパスを返す。
+     * <p>
+     * 返されたパスにフォルダが実際に存在するとは限らない。
+     * </p>
+     * @param packageNameOrNull パッケージ名、無名パッケージの場合は{@code null}
+     * @return 対象のフォルダへのパス
+     * @throws IllegalArgumentException 引数に{@code null}が含まれる場合
+     */
+    public File getFolderFor(Name packageNameOrNull) {
+        if (packageNameOrNull == null) {
+            return outputPath;
+        }
         File path = outputPath;
-        for (SimpleName segment : Models.toList(packageDeclOrNull.getName())) {
+        for (SimpleName segment : Models.toList(packageNameOrNull)) {
             path = new File(path, segment.getToken());
         }
         return path;

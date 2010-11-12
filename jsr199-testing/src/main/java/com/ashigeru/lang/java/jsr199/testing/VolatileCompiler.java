@@ -21,6 +21,7 @@ import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -173,6 +174,30 @@ public class VolatileCompiler implements Closeable {
             loader.add(klass.getBinaryName(), klass.getBinaryContent());
         }
         return loader;
+    }
+
+    /**
+     * コンパイラが生成したソースファイルの一覧を返す。
+     * @return コンパイラが生成したソースファイルの一覧
+     */
+    public Collection<VolatileJavaFile> getSources() {
+        return files.getSources();
+    }
+
+    /**
+     * コンパイラが生成したリソースファイルの一覧を返す。
+     * @return コンパイラが生成したリソースファイルの一覧
+     */
+    public Collection<VolatileResourceFile> getResources() {
+        return files.getResources();
+    }
+
+    /**
+     * コンパイラが生成したクラスファイルの一覧を返す。
+     * @return コンパイラが生成したクラスファイルの一覧
+     */
+    public Collection<VolatileClassFile> getCompiled() {
+        return files.getCompiled();
     }
 
     @Override

@@ -31,7 +31,9 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
+import javax.tools.StandardLocation;
 
 /**
  * Mock Annotation Processor.
@@ -66,6 +68,14 @@ public class MockProcessor extends AbstractProcessor {
                 pw.println("    };");
                 pw.println("}");
                 pw.close();
+
+                FileObject resource = processingEnv.getFiler().createResource(
+                        StandardLocation.CLASS_OUTPUT,
+                        "com.example",
+                        "example.properties");
+                Writer rw = resource.openWriter();
+                rw.write("example=OK");
+                rw.close();
             }
             catch (IOException e) {
                 throw new AssertionError(e);

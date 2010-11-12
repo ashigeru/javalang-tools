@@ -15,11 +15,13 @@
  */
 package com.ashigeru.lang.java.internal.model.syntax;
 
+import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.ashigeru.lang.java.internal.model.util.LiteralAnalyzer;
 import com.ashigeru.lang.java.model.syntax.ModelKind;
 import com.ashigeru.lang.java.model.syntax.SimpleName;
 import com.ashigeru.lang.java.model.syntax.Visitor;
@@ -112,15 +114,21 @@ public final class SimpleNameImpl extends ModelRoot implements SimpleName {
             throw new IllegalArgumentException("string must not be null"); //$NON-NLS-1$
         }
         if (Character.isJavaIdentifierStart(string.charAt(0)) == false) {
-            throw new IllegalArgumentException("string must be a valid Java identifier");
+            throw new IllegalArgumentException(MessageFormat.format(
+                    "string must be a valid Java identifier ({0} has invalid start)",
+                    LiteralAnalyzer.stringLiteralOf(string)));
         }
         for (int i = 1, n = string.length(); i < n; i++) {
             if (Character.isJavaIdentifierPart(string.charAt(i)) == false) {
-                throw new IllegalArgumentException("string must be a valid Java identifier");
+                throw new IllegalArgumentException(MessageFormat.format(
+                        "string must be a valid Java identifier ({0} has invalid part)",
+                        LiteralAnalyzer.stringLiteralOf(string)));
             }
         }
         if (RESERVED.contains(string)) {
-            throw new IllegalArgumentException("string must be a valid Java identifier");
+            throw new IllegalArgumentException(MessageFormat.format(
+                    "string must be a valid Java identifier ({0} is a reserved word)",
+                    LiteralAnalyzer.stringLiteralOf(string)));
         }
         this.string = string;
     }

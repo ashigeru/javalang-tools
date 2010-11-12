@@ -17,7 +17,6 @@ package com.ashigeru.lang.java.jsr199.testing;
 
 import java.io.IOException;
 import java.lang.instrument.ClassDefinition;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -56,6 +55,8 @@ public class VolatileClassOutputManager
 
     private SortedMap<String, VolatileJavaFile> sourceMap;
 
+    private SortedMap<String, VolatileResourceFile> resourceMap;
+
     /**
      * インスタンスを生成する。
      * @param fileManager 移譲先のファイルマネージャ
@@ -65,14 +66,23 @@ public class VolatileClassOutputManager
         super(fileManager);
         this.classMap = new TreeMap<String, VolatileClassFile>();
         this.sourceMap = new TreeMap<String, VolatileJavaFile>();
+        this.resourceMap = new TreeMap<String, VolatileResourceFile>();
     }
 
     /**
      * このマネージャで生成されたソースファイルの一覧を返す。
      * @return このマネージャで生成されたソースファイルの一覧
      */
-    public Collection<VolatileJavaFile> getGenerated() {
+    public Collection<VolatileJavaFile> getSources() {
         return new ArrayList<VolatileJavaFile>(sourceMap.values());
+    }
+
+    /**
+     * このマネージャで生成されたリソースファイルの一覧を返す。
+     * @return このマネージャで生成されたリソースファイルの一覧
+     */
+    public Collection<VolatileResourceFile> getResources() {
+        return new ArrayList<VolatileResourceFile>(resourceMap.values());
     }
 
     /**
@@ -97,7 +107,9 @@ public class VolatileClassOutputManager
             super.close();
         }
         finally {
+            this.sourceMap = new TreeMap<String, VolatileJavaFile>();
             this.classMap = new TreeMap<String, VolatileClassFile>();
+            this.resourceMap = new TreeMap<String, VolatileResourceFile>();
         }
     }
 
@@ -122,7 +134,8 @@ public class VolatileClassOutputManager
                 relativeName,
                 JavaFileObject.Kind.CLASS);
             if (binaryName == null) {
-                return null;
+                String path = toPath(packageName, relativeName);
+                return resourceMap.get(path);
             }
             return getJavaFileForInput(location, binaryName, JavaFileObject.Kind.CLASS);
         }
@@ -132,7 +145,8 @@ public class VolatileClassOutputManager
                 relativeName,
                 JavaFileObject.Kind.SOURCE);
             if (binaryName == null) {
-                return null;
+                String path = toPath(packageName, relativeName);
+                return resourceMap.get(path);
             }
             return getJavaFileForInput(location, binaryName, JavaFileObject.Kind.SOURCE);
         }
@@ -153,10 +167,13 @@ public class VolatileClassOutputManager
                 relativeName,
                 JavaFileObject.Kind.CLASS);
             if (binaryName == null) {
-                throw new IOException(MessageFormat.format(
-                    "Cannot open {0} ({1})",
-                    relativeName,
-                    packageName));
+                String path = toPath(packageName, relativeName);
+                VolatileResourceFile file = resourceMap.get(path);
+                if (file == null) {
+                    file = new VolatileResourceFile(path);
+                    resourceMap.put(path, file);
+                }
+                return file;
             }
             return getJavaFileForOutput(
                 location,
@@ -170,10 +187,13 @@ public class VolatileClassOutputManager
                 relativeName,
                 JavaFileObject.Kind.SOURCE);
             if (binaryName == null) {
-                throw new IOException(MessageFormat.format(
-                    "Cannot open {0} ({1})",
-                    relativeName,
-                    packageName));
+                String path = toPath(packageName, relativeName);
+                VolatileResourceFile file = resourceMap.get(path);
+                if (file == null) {
+                    file = new VolatileResourceFile(path);
+                    resourceMap.put(path, file);
+                }
+                return file;
             }
             return getJavaFileForOutput(
                 location,
@@ -333,5 +353,14 @@ public class VolatileClassOutputManager
     private static String normalizeClassName(String className) {
         assert className != null;
         return className.replace(SEGMENT_SEPARATOR, NAME_SEPARATOR);
+    }
+
+    private String toPath(String packageName, String relativeName) {
+        assert packageName != null;
+        assert relativeName != null;
+        if (packageName.isEmpty()) {
+            return relativeName;
+        }
+        return packageName + SEGMENT_SEPARATOR + relativeName;
     }
 }
