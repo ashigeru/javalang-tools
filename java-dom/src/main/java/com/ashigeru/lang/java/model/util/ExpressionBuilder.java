@@ -220,7 +220,7 @@ public class ExpressionBuilder {
         }
         return chain(f.newAssignmentExpression(
                 context,
-                InfixOperator.ASSIGN,
+                operator,
                 rightHandSide));
     }
 
