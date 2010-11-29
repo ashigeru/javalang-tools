@@ -222,7 +222,7 @@ public class ImportBuilder {
             if (o1.getImportKind() != o2.getImportKind()) {
                 return o1.getImportKind().compareTo(o2.getImportKind());
             }
-            return o1.getName().toString().compareTo(o2.getName().toString());
+            return o1.getName().toNameString().compareTo(o2.getName().toNameString());
         }
     }
 

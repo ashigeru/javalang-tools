@@ -241,7 +241,7 @@ public class ImportBuilderTest {
         Set<String> actual = new TreeSet<String>();
         for (ImportDeclaration d : decls) {
             assertThat(d.getImportKind(), is(ImportKind.SINGLE_TYPE));
-            String name = d.getName().toString();
+            String name = d.getName().toNameString();
             assertThat(actual, not(hasItem(name)));
             actual.add(name);
         }

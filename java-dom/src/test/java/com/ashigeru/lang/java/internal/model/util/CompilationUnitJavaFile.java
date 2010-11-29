@@ -73,13 +73,13 @@ public class CompilationUnitJavaFile extends SimpleJavaFileObject {
         StringBuilder buf = new StringBuilder();
         PackageDeclaration packageDeclaration = unit.getPackageDeclaration();
         if (packageDeclaration != null) {
-            String pkg = packageDeclaration.getName().toString().replace('.', '/');
+            String pkg = packageDeclaration.getName().toNameString().replace('.', '/');
             buf.append(pkg);
             buf.append('/');
         }
         TypeDeclaration primaryType = findPrimaryType(unit);
         if (primaryType != null) {
-            buf.append(primaryType.getName().toString());
+            buf.append(primaryType.getName().toNameString());
         }
         else {
             buf.append("package-info");

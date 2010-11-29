@@ -52,6 +52,7 @@ import com.ashigeru.lang.java.model.syntax.Type;
 import com.ashigeru.lang.java.model.syntax.TypeDeclaration;
 import com.ashigeru.lang.java.model.syntax.Wildcard;
 import com.ashigeru.lang.java.model.syntax.WildcardBoundKind;
+import com.ashigeru.lang.java.model.util.Emitter;
 import com.ashigeru.lang.java.model.util.Models;
 
 /**
@@ -407,8 +408,7 @@ public class Jsr269 {
             name.append(unit.getPackageDeclaration().getName());
             name.append('.');
         }
-        TypeDeclaration primary =
-            com.ashigeru.lang.java.model.util.Filer.findPrimaryType(unit);
+        TypeDeclaration primary = Emitter.findPrimaryType(unit);
         if (primary == null) {
             name.append("package-info");
         }
