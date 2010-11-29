@@ -15,6 +15,7 @@
  */
 package com.ashigeru.lang.java.internal.model.syntax;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -85,6 +86,19 @@ public final class QualifiedNameImpl extends ModelRoot implements QualifiedName 
     @Override
     public SimpleName getLastSegment() {
         return getSimpleName();
+    }
+
+    @Override
+    public String toNameString() {
+        Iterator<SimpleName> iter = toNameList().iterator();
+        assert iter.hasNext();
+        StringBuilder buf = new StringBuilder();
+        buf.append(iter.next());
+        while (iter.hasNext()) {
+            buf.append('.');
+            buf.append(iter.next());
+        }
+        return buf.toString();
     }
 
     @Override

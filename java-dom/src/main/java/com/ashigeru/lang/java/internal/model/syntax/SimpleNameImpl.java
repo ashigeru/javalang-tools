@@ -143,6 +143,11 @@ public final class SimpleNameImpl extends ModelRoot implements SimpleName {
         return Collections.<SimpleName>singletonList(this);
     }
 
+    @Override
+    public String toNameString() {
+        return getToken();
+    }
+
     /**
      * この要素の種類を表す{@link ModelKind#SIMPLE_NAME}を返す。
      * @return {@link ModelKind#SIMPLE_NAME}

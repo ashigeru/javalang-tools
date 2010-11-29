@@ -50,4 +50,10 @@ public interface Name
      * @return 変換後の名前
      */
     List<SimpleName> toNameList();
+
+    /**
+     * この名前に対する正規化された文字列を返す。
+     * @return 名前に対する正規化された文字列
+     */
+    String toNameString();
 }
