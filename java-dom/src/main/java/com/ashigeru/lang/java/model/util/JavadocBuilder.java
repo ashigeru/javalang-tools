@@ -251,7 +251,7 @@ public class JavadocBuilder {
         if (type.getModelKind() != ModelKind.NAMED_TYPE) {
             throw new IllegalArgumentException("type must be a simple name-type");
         }
-        block("@throw");
+        block("@throws");
         elements.add(((NamedType) type).getName());
         return this;
     }
