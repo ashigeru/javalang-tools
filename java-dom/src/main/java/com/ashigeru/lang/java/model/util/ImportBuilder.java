@@ -70,7 +70,7 @@ public class ImportBuilder {
         if (strategy == null) {
             throw new IllegalArgumentException("strategy must not be null"); //$NON-NLS-1$
         }
-        this.resolver = new Resolver(factory, strategy);
+        this.resolver = new Resolver(factory, strategy, packageDecl);
         this.packageDecl = packageDecl;
     }
 
@@ -234,11 +234,25 @@ public class ImportBuilder {
 
         final Map<SimpleName, Name> reserved;
 
+        private Set<Name> knownPackageNames = new HashSet<Name>();
+
         final ModelFactory factory;
 
-        Resolver(ModelFactory factory, Strategy strategy) {
+        Resolver(
+                ModelFactory factory,
+                Strategy strategy,
+                PackageDeclaration packageDecl) {
             this.factory = factory;
             this.strategy = strategy;
+            this.knownPackageNames = new HashSet<Name>();
+            if (packageDecl != null) {
+                Name current = packageDecl.getName();
+                while (current instanceof QualifiedName) {
+                    this.knownPackageNames.add(current);
+                    current = ((QualifiedName) current).getQualifier();
+                }
+                this.knownPackageNames.add(current);
+            }
             this.imported = new HashMap<QualifiedName, SimpleName>();
             this.reserved = new HashMap<SimpleName, Name>();
         }
@@ -314,6 +328,13 @@ public class ImportBuilder {
                 return false;
             }
             Name qualifier = ((QualifiedName) name).getQualifier();
+
+            // 限定子がパッケージなら、その名前は定義上トップレベル
+            if (knownPackageNames.contains(qualifier)) {
+                return false;
+            }
+
+            // 親の単純名がクラス名の形式であれば、この型は内部クラスとみなす
             SimpleName parent;
             if (qualifier.getModelKind() == ModelKind.QUALIFIED_NAME) {
                 parent = ((QualifiedName) qualifier).getSimpleName();

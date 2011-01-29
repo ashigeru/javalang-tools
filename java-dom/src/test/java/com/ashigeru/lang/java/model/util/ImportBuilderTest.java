@@ -29,7 +29,6 @@ import java.util.TreeSet;
 
 import org.junit.Test;
 
-import com.ashigeru.lang.java.model.syntax.Annotation;
 import com.ashigeru.lang.java.model.syntax.ImportDeclaration;
 import com.ashigeru.lang.java.model.syntax.ImportKind;
 import com.ashigeru.lang.java.model.syntax.ModelFactory;
@@ -123,8 +122,6 @@ public class ImportBuilderTest {
     @Test
     public void current() {
         PackageDeclaration pkg = f.newPackageDeclaration(
-            null,
-            Collections.<Annotation>emptyList(),
             Models.toName(f, "com.example"));
         ImportBuilder importer = new ImportBuilder(f, pkg, Strategy.TOP_LEVEL);
         assertThat(importer.resolve(type("com.example.Test")), is(type("Test")));
