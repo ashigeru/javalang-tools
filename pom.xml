@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
     <groupId>com.ashigeru.lang.java</groupId>
     <artifactId>project</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1.0</version>
     <name>Java Language Tools</name>
 	<packaging>pom</packaging>
 	<modules>
