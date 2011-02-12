@@ -245,7 +245,7 @@ public class ModelEmitterTest {
             f.newParameterizedType(
                 f.newNamedType(f.newSimpleName("Comparable")),
                 Arrays.asList(new Type[] {
-                    f.newWildcard(WildcardBoundKind.UNBOUNDED, null)
+                    f.newWildcard()
                 })));
 
         assertThat(type, instanceOf(java.lang.reflect.ParameterizedType.class));
@@ -1228,10 +1228,10 @@ public class ModelEmitterTest {
             fromStmt("Hello",
                 newStringBuilder("buf"),
                 f.newSynchronizedStatement(
-                    f.newThis(null),
+                    f.newThis(),
                     f.newBlock(Arrays.asList(new Statement[] {
                         f.newExpressionStatement(f.newMethodInvocationExpression(
-                            f.newThis(null),
+                            f.newThis(),
                             Arrays.asList(new Type[] {}),
                             f.newSimpleName("notify"),
                             Arrays.asList(new Expression[] {}))),

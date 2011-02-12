@@ -1291,21 +1291,66 @@ class EmitEngine extends StrictVisitor<Void, EmitContext, NoThrow> {
     @Override
     public Void visitDocBlock(DocBlock elem, EmitContext context) {
         begin(elem, context);
-        if (elem.getTag().length() != 0) {
-            context.separator(elem.getTag());
+        String tag = elem.getTag();
+        if (tag.length() != 0) {
+            context.separator(tag);
             context.padding();
         }
-        for (DocElement fragment : elem.getElements()) {
-            if (fragment.getModelKind() == ModelKind.DOC_BLOCK) {
-                context.docInlineBlock(EmitDirection.BEGIN);
-                process(fragment, context);
-                context.docInlineBlock(EmitDirection.END);
-            }
-            else {
-                process(fragment, context);
-            }
+        int offset = 0;
+        List<? extends DocElement> elements = elem.getElements();
+        if (tag.equals("@param") && isDocTypeParameter(elements)) {
+            // @param <T>
+            context.symbol("<");
+            context.symbol(((SimpleName) elements.get(1)).getToken());
+            context.symbol(">");
+            context.padding();
+            offset = 3;
+        }
+
+        for (int i = offset, n = elements.size(); i < n; i++) {
+            processDocInlineElement(elements.get(i), i == n - 1, context);
         }
         return null;
+    }
+
+    private boolean isDocTypeParameter(List<? extends DocElement> elements) {
+        if (elements.size() < 3) {
+            return false;
+        }
+        if (elements.get(0).getModelKind() != ModelKind.DOC_TEXT) {
+            return false;
+        }
+        if (elements.get(1).getModelKind() != ModelKind.SIMPLE_NAME) {
+            return false;
+        }
+        if (elements.get(2).getModelKind() != ModelKind.DOC_TEXT) {
+            return false;
+        }
+        if (((DocText) elements.get(0)).getString().equals("<") == false) {
+            return false;
+        }
+        if (((DocText) elements.get(2)).getString().equals(">") == false) {
+            return false;
+        }
+        return true;
+    }
+
+    private void processDocInlineElement(DocElement elem, boolean last, EmitContext context) {
+        if (elem.getModelKind() == ModelKind.DOC_BLOCK) {
+            context.docInlineBlock(EmitDirection.BEGIN);
+            process(elem, context);
+            context.docInlineBlock(EmitDirection.END);
+        }
+        else if (elem.getModelKind() == ModelKind.DOC_TEXT) {
+            process(elem, context);
+        }
+        else {
+            context.padding();
+            process(elem, context);
+            if (last == false) {
+                context.padding();
+            }
+        }
     }
 
     @Override

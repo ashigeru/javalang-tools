@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import com.ashigeru.lang.java.model.syntax.Attribute;
 import com.ashigeru.lang.java.model.syntax.Expression;
 import com.ashigeru.lang.java.model.syntax.ExpressionStatement;
 import com.ashigeru.lang.java.model.syntax.InfixOperator;
@@ -137,13 +136,7 @@ public class ExpressionBuilder {
         if (name == null) {
             throw new IllegalArgumentException("name must not be null"); //$NON-NLS-1$
         }
-        return f.newLocalVariableDeclaration(
-                Collections.<Attribute>emptyList(),
-                type,
-                Collections.singletonList(f.newVariableDeclarator(
-                        name,
-                        0,
-                        context)));
+        return f.newLocalVariableDeclaration(type, name, context);
     }
 
     /**

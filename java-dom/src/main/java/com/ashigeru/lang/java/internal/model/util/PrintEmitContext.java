@@ -350,7 +350,6 @@ public class PrintEmitContext implements EmitContext {
         case SEPARATOR: {
             if (next != State.PADDING
                     && next != State.SYMBOL
-                    && next != State.OPERATOR
                     && next != State.SEPARATOR
                     && next != State.LINE_END) {
                 putPadding();
@@ -362,7 +361,9 @@ public class PrintEmitContext implements EmitContext {
             break;
         }
         case PADDING: {
-            putPadding();
+            if (next != State.PADDING) {
+                putPadding();
+            }
             break;
         }
         case BLOCK_START: {
