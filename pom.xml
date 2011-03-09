@@ -9,6 +9,7 @@
     <name>Java Language Tools</name>
 	<packaging>pom</packaging>
 	<modules>
+		<module>parent</module>
 		<module>java-dom</module>
 		<module>javadoc-parser</module>
 		<module>jsr269-bridge</module>
