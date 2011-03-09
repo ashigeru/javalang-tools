@@ -16,6 +16,19 @@
         </license>
     </licenses>
 
+    <pluginRepositories>
+        <pluginRepository>
+            <id>jflex</id>
+            <name>JFlex repository</name>
+            <url>http://jflex.sourceforge.net/repo/</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>codehaus.org</id>
+            <name>Codehaus Maven Repository</name>
+            <url>http://repository.codehaus.org/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
     <build>
         <plugins>
             <plugin>
